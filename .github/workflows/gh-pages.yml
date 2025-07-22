@@ -1,0 +1,39 @@
+# .github/workflows/gh-pages.yml
+name: Deploy dashboard to GitHub Pages
+
+on:
+  push:
+    branches: [main]        # redeploy à chaque push sur main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write           # requis par actions/deploy-pages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout le dépôt
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Préparer l'artifact à publier (tout le dépôt)
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      # 3. Déployer sur GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v2
